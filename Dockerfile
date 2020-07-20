@@ -5,9 +5,9 @@ RUN apk --update --no-cache add tzdata
 ENV TZ America/Los_Angeles
 
 # Get 1.3.1
-RUN wget https://github.com/zgoat/goatcounter/releases/download/v1.3.1/goatcounter-v1.3.1-linux-amd64.gz
-RUN gunzip goatcounter-v1.3.1-linux-amd64.gz
-RUN mv goatcounter-v1.3.1-linux-amd64 goatcounter
+RUN wget -O goatcounter.gz \
+    https://github.com/zgoat/goatcounter/releases/download/v1.3.2/goatcounter-v1.3.2-linux-amd64.gz
+RUN gunzip goatcounter.gz
 RUN chmod a+x goatcounter
 
 # Run at port 5000 (dokku's default)
