@@ -30,6 +30,7 @@ psql '<connection_string>' -c '\i goatcounter/db/schema.pgsql'
 Create persistant mount:
 
 ```
+mkdir /var/lib/dokku/data/storage/<app_name>
 dokku storage:mount <app_name> /var/lib/dokku/data/storage/<app_name>:/db
 ```
 
