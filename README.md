@@ -2,53 +2,71 @@
 
 This repo contains Dockerfile and instructions for setup and running [gocounter](https://github.com/zgoat/goatcounter) as a [dokku](http://dokku.viewdocs.io/dokku/) app.
 
-Assume all commands are run from the instance where dokku is running with exception of `Create app (from local)` code block.
+You can ignore setting up a database, but note each time you deploy a new version, all data will be lost.
 
-If you don't want Postgres as database, you can ignore the steps, but note each time you deploy a new version, all data will be lost. I personally have a small Postgres instance running in AWS RDS for all my storage needs.
+## Setup
 
-### Setup postgres
+### Setup Database
+
+#### PostgreSQL
+
+Create a counter database:
 
 ```
-psql '<connection string>'
+psql '<connection_string>'
 CREATE DATABASE counter;
 CREATE USER counter WITH PASSWORD '<password>';
 ```
 
-### Import schema to postgres
+Import schema to Postgres:
 
 ```
 git clone -b release-1.3 https://github.com/zgoat/goatcounter.git
-psql '<connection string>' -c '\i goatcounter/db/schema.pgsql'
+psql '<connection_string>' -c '\i goatcounter/db/schema.pgsql'
 ```
 
-### Create app (from local)
+#### SQLite
+
+Create persistant mount:
 
 ```
-git remote add dokku dokku@<dokku host>:<app name>
+dokku storage:mount <app_name> /var/lib/dokku/data/storage/<app_name>:/db
+```
 
-# this'll fail b/c $GOATCOUNTER_DB is not set, but it will still create the app
+The connection string is now: `sqlite://db/goatcounter.sqlite3`
+
+### Setup Dokku App
+
+Dokku config:
+
+```
+dokku config:set <app_name> GOATCOUNTER_DB='<connection_string>'
+```
+
+Push to Dokku from local machine:
+
+```
+git remote add dokku dokku@<dokku_host>:<app_name>
 git push dokku master
 ```
 
-### Setup config
+Create domain:
 
 ```
-dokku config:set <app name>GOATCOUNTER_DB='<connection string>'
-dokku ps:restart <app name>
+sudo docker exec <app_name>.web.1 \
+    ./goatcounter create \
+    -domain <domain> \
+    -email <email> \
+    -password <password> \
+    -db '<connection_string>'
 ```
 
-### Create domain
-
-```
-sudo docker exec <app name>.web.1 ./goatcounter create -domain <domain> -email <email> -password <password> -db '<connection string>'
-```
-
-### Setup letencrypt (optional)
+### Setup LetsEncrypt (optional)
 
 ```
 dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
-dokku config:set --no-restart <app name> DOKKU_LETSENCRYPT_EMAIL=<email>
-dokku lets encrypt <app name>
+dokku config:set --no-restart <app_name> DOKKU_LETSENCRYPT_EMAIL=<email>
+dokku letsencrypt <app_name>
 ```
 
 Visit <domain> in a browser you and it should all just work.
