@@ -6,7 +6,7 @@ ENV TZ America/Los_Angeles
 
 # Get 1.3.1
 RUN wget -O goatcounter.gz \
-    https://github.com/zgoat/goatcounter/releases/download/v1.3.2/goatcounter-v1.3.2-linux-amd64.gz
+    https://github.com/zgoat/goatcounter/releases/download/v1.4.0/goatcounter-v1.4.0-linux-amd64.gz
 RUN gunzip goatcounter.gz
 RUN chmod a+x goatcounter
 
